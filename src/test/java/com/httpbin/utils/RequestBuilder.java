@@ -5,8 +5,19 @@ import io.restassured.specification.RequestSpecification;
 
 public class RequestBuilder {
 
-    public static RequestSpecification getRequest() {
-        return RestAssured.given()
-                .header("Content-Type", "application/json");
+    private static RequestSpecification request;
+
+    public static void setBaseUri(String baseUri) {
+        RestAssured.baseURI = baseUri;
+    }
+
+    public static RequestSpecification getRequest(boolean followRedirects) {
+        request = RestAssured
+                .given()
+                .relaxedHTTPSValidation()
+                .redirects()
+                .follow(followRedirects); 
+
+        return request;
     }
 }
