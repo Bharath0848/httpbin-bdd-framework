@@ -17,6 +17,7 @@ public class RedirectSteps {
 
     private Response response;
     private boolean followRedirects = false;
+
     private ScenarioContext scenarioContext = new ScenarioContext();
 
     @Given("base URL is set to {string}")
@@ -95,7 +96,7 @@ public class RedirectSteps {
 
         String value = response.getHeader(headerName);
 
-        Assert.assertNotNull(value);
+        Assert.assertNotNull(value, "Header " + headerName + " is null");
 
         scenarioContext.set(key, value);
     }
@@ -105,7 +106,7 @@ public class RedirectSteps {
 
         String endpoint = (String) scenarioContext.get(key);
 
-        Assert.assertNotNull(endpoint);
+        Assert.assertNotNull(endpoint, "No value found in context for key: " + key);
 
         sendRequest(method, endpoint);
     }
@@ -122,11 +123,15 @@ public class RedirectSteps {
     @Then("response status code should be {int}")
     public void validateStatusCode(int expectedStatusCode) {
 
-        Assert.assertNotNull(response);
+        Assert.assertNotNull(response, "Response is null");
 
         int actual = response.getStatusCode();
 
-        Assert.assertEquals(actual, expectedStatusCode);
+        Assert.assertEquals(
+                actual,
+                expectedStatusCode,
+                "Status code mismatch! Expected: " + expectedStatusCode + " but got: " + actual
+        );
     }
 
     @Then("response header {string} should contain {string}")
@@ -134,17 +139,21 @@ public class RedirectSteps {
 
         String header = response.getHeader(headerName);
 
-        Assert.assertNotNull(header);
+        Assert.assertNotNull(header, "Header '" + headerName + "' is missing");
 
-        Assert.assertTrue(header.contains(expectedValue));
+        Assert.assertTrue(
+                header.contains(expectedValue),
+                "Expected header to contain: " + expectedValue + " but was: " + header
+        );
     }
 
     @Then("response header {string} should not be null")
     public void validateHeaderNotNull(String headerName) {
 
-        String header = response.getHeader(headerName);
-
-        Assert.assertNotNull(header);
+        Assert.assertNotNull(
+                response.getHeader(headerName),
+                "Header '" + headerName + "' should not be null"
+        );
     }
 
     @Then("response header {string} should be empty")
@@ -152,9 +161,12 @@ public class RedirectSteps {
 
         String header = response.getHeader(headerName);
 
-        Assert.assertNotNull(header);
+        Assert.assertNotNull(header, "Header missing");
 
-        Assert.assertTrue(header.trim().isEmpty());
+        Assert.assertTrue(
+                header.trim().isEmpty(),
+                "Header is not empty: " + header
+        );
     }
 
     @Then("final response should not contain {string} response body")
@@ -162,7 +174,10 @@ public class RedirectSteps {
 
         String body = response.getBody().asString();
 
-        Assert.assertFalse(body.contains(value));
+        Assert.assertFalse(
+                body.contains(value),
+                "Redirect was followed unexpectedly"
+        );
     }
 
     @Then("response body should contain {string}")
@@ -170,7 +185,10 @@ public class RedirectSteps {
 
         String body = response.getBody().asString();
 
-        Assert.assertTrue(body.contains(value));
+        Assert.assertTrue(
+                body.contains(value),
+                "Response body does not contain: " + value
+        );
     }
 
     private void logResponse(String method, String endpoint) {
