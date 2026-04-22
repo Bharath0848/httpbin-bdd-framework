@@ -20,6 +20,7 @@ Feature: HTTP Delay Endpoint Validation using HttpBin
   Scenario Outline: Validate delay endpoint with decimal and negative values
     When user sends "<method>" request of "/delay/<value>"
     Then response status code should be equal to 200
+    And response should be handled correctly for "<value>"
     Examples:
       | method | value |
       | GET    | 3.2   |
@@ -41,6 +42,17 @@ Feature: HTTP Delay Endpoint Validation using HttpBin
   Scenario: Validate incorrect delay endpoint path
     When user sends "DELETE" request of "/delaay/3"
     Then response status code should be equal to 404
+
+
+  Scenario: Chaining + Schema Validation
+    When user sends "POST" request with delay "2" and payload "{\"name\":\"John\",\"job\":\"QA\"}"
+    Then response status code should be equal to 200
+    And response should match JSON schema "Delayschema.json" 
+
+    When user sends "PUT" request with delay "2" and payload "{\"name\":\"John\",\"job\":\"Lead\"}"
+    Then response status code should be equal to 200
+    And response should match previous response
+  
 
 
 
