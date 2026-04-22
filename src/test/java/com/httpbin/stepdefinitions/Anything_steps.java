@@ -1,4 +1,6 @@
 package com.httpbin.stepdefinitions;
+
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -7,22 +9,21 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import com.httpbin.pojo.Anything_Pojo;
 import java.time.Instant;
-
+import java.util.Map;
 
 public class Anything_steps {
     private RequestSpecification request;
     private Response response;
     private static String chainedId; 
 
-    // --- SETUP ---
     @Given("I have the API base URL {string}")
     public void setBaseUri(String uri) {
         RestAssured.baseURI = uri;
         request = given().header("Content-Type", "application/json");
     }
 
-    // --- CREATE (POST) ---
-    @Given("I provide user details with id {int}, name {string}, and status {string}")
+    // --- CREATE (Scenario Outline) ---
+    @And("I provide user details with id {int}, name {string}, and status {string}")
     public void provideUserDetails(int id, String name, String active) {
         boolean isActive = Boolean.parseBoolean(active);
         request.body(new Anything_Pojo(id, name, isActive));
@@ -39,15 +40,16 @@ public class Anything_steps {
         System.out.println(">>> SUCCESS: ID " + chainedId + " saved for later steps.");
     }
 
-    // --- READ (GET) ---
+    // --- READ (DataTable) ---
     @Given("I log in with valid credentials {string} and {string}")
     public void login(String user, String pass) {
         request.auth().basic(user, pass);
     }
 
-    @Given("I include a tracking ID {string} and a timestamp")
-    public void addTrackingAndTimestamp(String trackId) {
-        request.queryParam("tracking_id", trackId);
+    @And("I include the following tracking details:")
+    public void includeTrackingDetails(DataTable dataTable) {
+        Map<String, String> data = dataTable.asMap(String.class, String.class);
+        request.queryParams(data);
         request.header("X-Client-Timestamp", Instant.now().toString());
     }
 
@@ -58,14 +60,13 @@ public class Anything_steps {
 
     @Then("the response should display the correct tracking ID")
     public void verifyTrackingId() {
-        // We use the param we sent earlier
         response.then().body("args.tracking_id", notNullValue());
     }
 
-    // --- UPDATE (PUT & PATCH) ---
-    @Given("I update the status to {string}")
+    // --- UPDATE ---
+    @And("I update the status to {string}")
     public void updateStatusDetails(String status) {
-    	Anything_Pojo data = new Anything_Pojo();
+        Anything_Pojo data = new Anything_Pojo();
         data.setStatus(status);
         request.body(data);
     }
@@ -80,9 +81,9 @@ public class Anything_steps {
         response.then().body("json.status", equalTo(expectedStatus));
     }
 
-    @Given("I change the age to {int}")
+    @And("I change the age to {int}")
     public void changeAgeDetails(int age) {
-    	Anything_Pojo data = new Anything_Pojo();
+        Anything_Pojo data = new Anything_Pojo();
         data.setAge(age);
         request.body(data);
     }
@@ -94,7 +95,8 @@ public class Anything_steps {
 
     @Then("the record age should show as {int}")
     public void verifyUpdatedAge(int expectedAge) {
-        response.then().body("json.age", hasToString(String.valueOf(expectedAge)));
+        // Checking age inside the 'json' field
+        response.then().body("json.age", equalTo(expectedAge));
     }
 
     // --- DELETE ---
@@ -108,7 +110,7 @@ public class Anything_steps {
         response.then().body("args.id", equalTo(chainedId));
     }
 
-    // --- NEGATIVE / ERROR HANDLING ---
+    // --- NEGATIVE ---
     @When("I try to access a non-existent page {string}")
     public void accessInvalidPage(String page) {
         response = request.get(page);
@@ -116,11 +118,9 @@ public class Anything_steps {
 
     @When("I use the wrong method for the status page")
     public void useWrongMethod() {
-        // Using GET on a path designed to test 405 constraints
         response = request.get("/status/405");
     }
 
-    // Reusable step for all status code checks
     @Then("the request should be successful with status {int}")
     @Then("I should receive a {int} Not Found error")
     @Then("I should receive a {int} Method Not Allowed error")
@@ -129,12 +129,8 @@ public class Anything_steps {
     }
 
     @Then("the response should list the allowed methods")
-    public void checkAllowHeader() {
+    public void the_response_should_list_the_allowed_methods() {
         String allowHeader = response.getHeader("Allow");
-        if (allowHeader != null) {
-            System.out.println(">>> Allowed Methods: " + allowHeader);
-        } else {
-            System.out.println(">>> Info: 'Allow' header not provided by this endpoint.");
-        }
+        System.out.println(">>> Allowed Methods: " + allowHeader);
     }
 }
