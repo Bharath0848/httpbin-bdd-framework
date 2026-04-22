@@ -101,4 +101,4 @@ Feature: Redirect behavior validation using /redirect-to endpoint
     When user sends "GET" request to extracted "redirectUrl"
     Then response status code should be 200
     And response body should contain "url"
-    And response should match JSON schema "get_response_schema.json"
+    And response should match JSON schema for redirect "get_response_schema.json"

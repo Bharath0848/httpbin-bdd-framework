@@ -111,7 +111,7 @@ public class RedirectSteps {
         sendRequest(method, endpoint);
     }
 
-    @Then("response should match JSON schema {string}")
+    @Then("response should match JSON schema for redirect {string}")
     public void validateSchema(String schemaFile) {
 
         response.then().assertThat()
@@ -195,7 +195,7 @@ public class RedirectSteps {
         System.out.println("====================================");
         System.out.println("Request Method: " + method);
         System.out.println("Endpoint: " + endpoint);
-        System.out.println("Response Status: " + response.getStatusCode());
+        System .out.println("Response Status: " + response.getStatusCode());
         System.out.println("Response Headers: " + response.getHeaders());
         System.out.println("Response Body: " + response.getBody().asString());
         System.out.println("====================================");
