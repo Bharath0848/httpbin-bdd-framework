@@ -1,10 +1,9 @@
 Feature: Anything Module Full CRUD Operations
-  As a user, I want to manage records in the Anything module 
-  So that I can create, read, update, and delete data securely.
 
   Background:
     Given I have the API base URL "https://httpbin.org"
 
+  # 1. Using Scenario Outline (Data-Driven)
   Scenario Outline: User creates a new record and saves the ID
     And I provide user details with id <id>, name "<name>", and status "<active>"
     When I submit a request to create a record
@@ -16,9 +15,14 @@ Feature: Anything Module Full CRUD Operations
       | 994  | Madhan_User    | true   |
       | 105  | Arun_Tester    | false  |
 
-  Scenario: User views record details with security and tracking
+  # 2. Using DataTable (Grouped Parameters)
+  Scenario: User views record details with tracking table
     Given I log in with valid credentials "user" and "pass"
-    And I include a tracking ID "REQ-001" and a timestamp
+    And I include the following tracking details:
+      | parameter   | value      |
+      | tracking_id | REQ-001    |
+      | source      | batch5_app |
+      | priority    | high       |
     When I request the record details
     Then the request should be successful with status 200
     And the response should display the correct tracking ID
