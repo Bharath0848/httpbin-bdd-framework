@@ -1,5 +1,4 @@
 package com.httpbin.stepdefinitions;
-
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -10,8 +9,11 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+
 import io.cucumber.datatable.DataTable;
 import java.util.List;
+
+import com.httpbin.utils.ConfigReader;
 
 public class Status_code {
 
@@ -20,13 +22,14 @@ public class Status_code {
 
     @Given("the base url of httpbin")
     public void set_base_url() {
-        baseURI = "https://httpbin.org/status";
+        ConfigReader.loadConfig();   // load properties
+        baseURI = ConfigReader.get("base_url") + "/status";
     }
 
     @When("the post request is sent with status code {int}")
     public void sent_post_request(int code) {
         response = given()
-                .auth().oauth2("mytoken")
+                .auth().oauth2(ConfigReader.get("bearer_token"))
                 .contentType(ContentType.JSON)
                 .body("{\"post\":\"applied\"}")
                 .pathParam("code", code)
@@ -37,13 +40,14 @@ public class Status_code {
     @When("the get request is sent with status code {int}")
     public void sent_get_request(int code) {
         response = given()
-                .auth().basic("admin", "admin@123")
+                .auth().basic(
+                        ConfigReader.get("username"),
+                        ConfigReader.get("password"))
                 .pathParam("code", code)
         .when()
                 .get("/{code}");
 
         chainedStatusCode = response.getStatusCode();
-       
     }
 
     @When("the put request is sent with chained status code and below data")
@@ -54,17 +58,18 @@ public class Status_code {
         String codes = chainedStatusCode + "," + secondCode;
 
         response = given()
-                .auth().oauth2("mytoken")
+                .auth().oauth2(ConfigReader.get("bearer_token"))
                 .contentType(ContentType.JSON)
                 .body("{\"put\":\"applied\"}")
                 .pathParam("codes", codes)
         .when()
                 .put("/{codes}");
     }
+
     @When("the patch request is sent without status code")
     public void sent_patch_request() {
         response = given()
-                .auth().oauth2("mytoken")
+                .auth().oauth2(ConfigReader.get("bearer_token"))
                 .contentType(ContentType.JSON)
                 .body("{\"patch\":\"applied\"}")
         .when()
@@ -74,7 +79,9 @@ public class Status_code {
     @When("the delete request is sent with status code {int}")
     public void sent_delete_request(int code) {
         response = given()
-                .auth().basic("admin", "admin@123")
+                .auth().basic(
+                        ConfigReader.get("username"),
+                        ConfigReader.get("password"))
                 .pathParam("code", code)
         .when()
                 .delete("/{code}");
