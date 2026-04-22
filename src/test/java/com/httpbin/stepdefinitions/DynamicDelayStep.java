@@ -2,6 +2,7 @@ package com.httpbin.stepdefinitions;
 
 import com.httpbin.managers.ScenarioContext;
 import com.httpbin.utils.ConfigReader;
+import com.httpbin.utils.ExcelUtility;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -10,6 +11,10 @@ import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import static org.testng.Assert.*;
+
+import java.util.List;
+import java.util.Map;
+
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 
@@ -39,6 +44,33 @@ public void user_sends_request_with_delay_and_payload(String method, String dela
             .request(method, com.httpbin.endpoints.Routes.DELAY);
 
     response.then().log().all();}
+
+    @When("user sends delay requests from excel {string}")
+public void user_sends_delay_requests_from_excel(String fileName) throws Exception {
+
+    ExcelUtility excel = new ExcelUtility();
+
+   
+    List<Map<String, String>> dataList = excel.getSheetData("Sheet3");
+    System.out.println(dataList);
+    for (Map<String, String> row : dataList) {
+
+        String method = row.get("method");
+        String seconds = row.get("seconds ");
+        int min = Integer.parseInt(row.get("min"));
+        int max = Integer.parseInt(row.get("max"));
+
+        System.out.println("Executing: " + method + " /delay/" + seconds);
+
+        sendRequest(method, "/delay/" + seconds);
+        long timeInSeconds = responseTime / 1000;
+        int lowerBound = min - 1;
+        int upperBound = max + 2;
+
+         assertTrue(timeInSeconds >= lowerBound && timeInSeconds <= upperBound,
+            "Response time not in expected range: " + timeInSeconds);
+    
+    }}
 
     @When("user sends {string} request of {string}")
     public void sendRequest(String method, String endpoint) {
