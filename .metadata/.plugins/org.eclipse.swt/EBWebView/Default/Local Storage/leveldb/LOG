@@ -1,3 +1,2 @@
-2026/04/21-08:30:36.404 3b78 Reusing MANIFEST C:\Users\arthi\OneDrive\Desktop\Http_Method1\httpbin-bdd-framework\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb/MANIFEST-000001
-2026/04/21-08:30:36.418 3b78 Recovering log #3
-2026/04/21-08:30:36.422 3b78 Reusing old log C:\Users\arthi\OneDrive\Desktop\Http_Method1\httpbin-bdd-framework\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb/000003.log 
+2026/04/22-13:17:44.138 6be8 Creating DB C:\Users\arthi\OneDrive\Desktop\Http_Method1\httpbin-bdd-framework\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb since it was missing.
+2026/04/22-13:17:44.168 6be8 Reusing MANIFEST C:\Users\arthi\OneDrive\Desktop\Http_Method1\httpbin-bdd-framework\.metadata\.plugins\org.eclipse.swt\EBWebView\Default\Local Storage\leveldb/MANIFEST-000001

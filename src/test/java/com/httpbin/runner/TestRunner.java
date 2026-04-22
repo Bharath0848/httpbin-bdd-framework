@@ -5,7 +5,7 @@ import io.cucumber.testng.CucumberOptions;
 
 @CucumberOptions(
    
-    features = "src/test/resources/features/DynamicDelay.feature",
+    features = "src/test/resources/features/Http_Methods.feature",
 
     glue = {"com.httpbin.stepdefinitions", "com.httpbin.hooks"},
     plugin = {

@@ -35,7 +35,7 @@ Scenario: Validate PATCH request with invalid input
   And response time will be less than 3000 ms
 
 
-Scenario: Validate DELETE request parameters
-  When user sends DELETE request to "/delete?name=arthi&role=tester"
-  Then response args will contain "arthi" and "tester"
+Scenario: Validate DELETE request parameters using Excel data
+  When user sends DELETE request using Excel data
+  Then response args will match name and role from Excel data
   And response time will be less than 3000 ms
