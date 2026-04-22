@@ -6,10 +6,9 @@ Feature: HTTP Delay Endpoint Validation using HttpBin
 
  
   Scenario Outline: User receives delayed response based on requested wait time
-    When user sends "<method>" request to "/delay/<seconds>"
-    Then response status code should be 200
+    When user sends "<method>" request of "/delay/<seconds>"
+    Then response status code should be equal to 200
     And response time should be between <min> and <max> seconds
-    And response should match JSON schema "delaySchema.json"
 
     Examples:
       | method | seconds | min | max |
@@ -19,11 +18,9 @@ Feature: HTTP Delay Endpoint Validation using HttpBin
 
 
   Scenario Outline: Validate delay endpoint with decimal and negative values
-    When user sends "<method>" request to "/delay/<value>"
-    Then response status code should be 200
+    When user sends "<method>" request of "/delay/<value>"
+    Then response status code should be equal to 200
     And response should be handled correctly for "<value>"
-    And response should match JSON schema "delaySchema.json"
-
     Examples:
       | method | value |
       | GET    | 3.2   |
@@ -33,8 +30,8 @@ Feature: HTTP Delay Endpoint Validation using HttpBin
 
 
   Scenario Outline: Validate delay endpoint with invalid inputs
-    When user sends "<method>" request to "/delay/<invalid>"
-    Then response status code should be 404
+    When user sends "<method>" request of "/delay/<invalid>"
+    Then response status code should be equal to 404
 
     Examples:
       | method | invalid |
@@ -43,8 +40,19 @@ Feature: HTTP Delay Endpoint Validation using HttpBin
 
 
   Scenario: Validate incorrect delay endpoint path
-    When user sends "DELETE" request to "/delaay/3"
-    Then response status code should be 404
+    When user sends "DELETE" request of "/delaay/3"
+    Then response status code should be equal to 404
+
+
+  Scenario: Chaining + Schema Validation
+    When user sends "POST" request with delay "2" and payload "{\"name\":\"John\",\"job\":\"QA\"}"
+    Then response status code should be equal to 200
+    And response should match JSON schema "Delayschema.json" 
+
+    When user sends "PUT" request with delay "2" and payload "{\"name\":\"John\",\"job\":\"Lead\"}"
+    Then response status code should be equal to 200
+    And response should match previous response
+  
 
 
 
