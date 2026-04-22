@@ -133,16 +133,12 @@ public class Step_Def_HttpMethods {
         name = dataList.get(0).get("value");   
         role = dataList.get(1).get("value");   
 
-        System.out.println("Name: " + name);
-        System.out.println("Role: " + role);
-
         response = given()
                 .queryParam("name", name)
                 .queryParam("role", role)
                 .when()
                 .delete(baseUrl + "/delete");
 
-        System.out.println("DELETE RESPONSE: " + response.asString());
     }
 
     @Then("response args will match name and role from Excel data")
