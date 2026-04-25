@@ -30,6 +30,7 @@ public class RedirectSteps {
     public void disableAutoRedirect() {
         followRedirects = false;
     }
+
     @When("user sends {string} request to {string}")
     public void sendRequest(String method, String endpoint) {
 
@@ -60,7 +61,6 @@ public class RedirectSteps {
         logResponse(method, endpoint);
     }
 
-   
     @When("user sends GET request with following URLs")
     public void sendMultipleRequests(DataTable table) {
 
@@ -83,30 +83,17 @@ public class RedirectSteps {
         }
     }
 
-    @Then("response header {string} should contain respective URL")
-    public void validateHeaderForDataTable(String headerName) {
-
-        String header = response.getHeader(headerName);
-
-        Assert.assertNotNull(header, "Header missing");
-
-        System.out.println("Header: " + header);
-    }
-
-
     @When("user sends request to {string} using test data")
     public void sendRequestUsingExcel(String endpoint) throws Exception {
 
-        List<Map<String, String>> dataList = ExcelUtility.getSheetData("Redirect");
+        List<Map<String, String>> dataList = new ExcelUtility().getSheetData("Sheet1");
 
         for (Map<String, String> data : dataList) {
 
             String url = data.get("url");
             String method = data.get("method");
 
-       
             if (url == null || url.trim().isEmpty()) {
-                System.out.println("Skipping invalid row (empty url)");
                 continue;
             }
 
@@ -138,36 +125,22 @@ public class RedirectSteps {
 
             logResponse(method, finalEndpoint);
 
-      
             Assert.assertEquals(response.getStatusCode(), 302);
 
             String location = response.getHeader("Location");
 
-            Assert.assertNotNull(location, "Location header missing");
+            Assert.assertNotNull(location);
 
             Assert.assertTrue(
-                    location.startsWith(url.split("\\?")[0]),
-                    "Expected redirect to start with: " + url + " but got: " + location
+                    location.startsWith(url.split("\\?")[0])
             );
         }
     }
 
-    @Then("response header {string} should contain test data url")
-    public void validateHeaderWithExcel(String headerName) {
-
-        String header = response.getHeader(headerName);
-
-        Assert.assertNotNull(header, "Header missing");
-
-        System.out.println("Final Header Value: " + header);
-    }
-
- 
-
     @Then("response status code should be {int}")
     public void validateStatusCode(int expectedStatusCode) {
 
-        Assert.assertNotNull(response, "Response is null");
+        Assert.assertNotNull(response);
 
         Assert.assertEquals(response.getStatusCode(), expectedStatusCode);
     }
@@ -177,7 +150,7 @@ public class RedirectSteps {
 
         String header = response.getHeader(headerName);
 
-        Assert.assertNotNull(header, "Header missing");
+        Assert.assertNotNull(header);
 
         Assert.assertTrue(header.contains(expectedValue));
     }
@@ -214,13 +187,12 @@ public class RedirectSteps {
         Assert.assertTrue(body.contains(value));
     }
 
-
     @Then("user extracts {string} header as {string}")
     public void extractHeader(String headerName, String key) {
 
         String value = response.getHeader(headerName);
 
-        Assert.assertNotNull(value, "Header is null");
+        Assert.assertNotNull(value);
 
         scenarioContext.set(key, value);
     }
@@ -230,7 +202,7 @@ public class RedirectSteps {
 
         String endpoint = (String) scenarioContext.get(key);
 
-        Assert.assertNotNull(endpoint, "No value found in context");
+        Assert.assertNotNull(endpoint);
 
         sendRequest(method, endpoint);
     }
@@ -243,8 +215,6 @@ public class RedirectSteps {
                         new File("src/test/resources/schemas/" + schemaFile)
                 ));
     }
-
-
 
     private void logResponse(String method, String endpoint) {
 

@@ -15,7 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelUtility {
 
-    private final String filePath = "./src/test/resources/testData/Exceldata.xlsx";
+    private final String filePath = "./src/test/resources/testData/redirect_testdata.xlsx";
 
    public List<Map<String, String>> getSheetData(String sheetName) throws IOException {
 
