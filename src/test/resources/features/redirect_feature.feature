@@ -7,6 +7,14 @@ Feature: Redirect behavior validation using /redirect-to endpoint
 
 
 
+ Scenario: Validate Bearer Authentication with configured token
+  When I send authenticated request using bearer token
+  Then response status code should be 200
+
+
+
+
+
   Scenario: Verify redirect for multiple relative URLs
     When user sends GET request with following URLs
       | url            |

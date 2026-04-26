@@ -1,6 +1,7 @@
 package com.httpbin.stepdefinitions;
 
 import com.httpbin.managers.ScenarioContext;
+import com.httpbin.utils.ConfigReader;
 import com.httpbin.utils.ExcelUtility;
 import com.httpbin.utils.RequestBuilder;
 import io.cucumber.datatable.DataTable;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class RedirectSteps {
-
+	private String token;
     private Response response;
     private boolean followRedirects = false;
 
@@ -30,12 +31,27 @@ public class RedirectSteps {
     public void disableAutoRedirect() {
         followRedirects = false;
     }
+    
+    @When("I send authenticated request using bearer token")
+    public void sendAuthenticatedRequestUsingBearerToken() {
+
+       
+        RequestSpecification request = RequestBuilder.getRequestBearer();
+
+        response = request.get("/bearer");
+        token = response.jsonPath().getString("token");
+        System.out.println("Authentication Token :" + token);
+
+        logResponse("GET", "/bearer");
+    }
+    
+    
 
     @When("user sends {string} request to {string}")
     public void sendRequest(String method, String endpoint) {
 
         RequestSpecification request =
-                RequestBuilder.getRequest(followRedirects);
+                RequestBuilder.getRequest(followRedirects).header("Authorization", "Bearer " + token); 
 
         switch (method.toUpperCase()) {
 
@@ -71,7 +87,7 @@ public class RedirectSteps {
             String url = row.get("url");
 
             response = RequestBuilder
-                    .getRequest(followRedirects)
+                    .getRequest(followRedirects).header("Authorization", "Bearer " + token)
                     .get("/redirect-to?url=" + url);
 
             logResponse("GET", "/redirect-to?url=" + url);
@@ -98,7 +114,7 @@ public class RedirectSteps {
             }
 
             RequestSpecification request =
-                    RequestBuilder.getRequest(followRedirects);
+                    RequestBuilder.getRequest(followRedirects).header("Authorization", "Bearer " + token);
 
             String finalEndpoint = endpoint + "?url=" + url;
 
