@@ -86,7 +86,7 @@ public class RedirectSteps {
     @When("user sends request to {string} using test data")
     public void sendRequestUsingExcel(String endpoint) throws Exception {
 
-        List<Map<String, String>> dataList = new ExcelUtility().getSheetData("Sheet1");
+        List<Map<String, String>> dataList = new ExcelUtility().getSheetData("Sheet4");
 
         for (Map<String, String> data : dataList) {
 

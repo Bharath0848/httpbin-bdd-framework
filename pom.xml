@@ -71,7 +71,7 @@
             <version>5.2.5</version>
         </dependency>
 
-        <!-- LOG4J-->
+        <!-- LOG4J -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -84,7 +84,20 @@
             <version>2.23.1</version>
         </dependency>
 
-    </dependencies>
+    <!-- Extent Reports -->
+    <dependency>
+        <groupId>com.aventstack</groupId>
+        <artifactId>extentreports</artifactId>
+        <version>5.0.9</version>
+    </dependency>
 
+    <!-- Extent Cucumber Adapter -->
+    <dependency>
+        <groupId>tech.grasshopper</groupId>
+        <artifactId>extentreports-cucumber7-adapter</artifactId>
+        <version>1.14.0</version>
+    </dependency>
+
+</dependencies>
 
 </project>

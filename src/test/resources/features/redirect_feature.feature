@@ -18,17 +18,17 @@ Feature: Redirect behavior validation using /redirect-to endpoint
 
  
 
-  Scenario Outline: Verify redirect with different query parameter combinations
+        
+Scenario Outline: Verify redirect with different query parameter combinations
     When user sends "GET" request to "/redirect-to?url=<url>"
     Then response status code should be 302
     And response header "Location" should contain "<expected>"
-
     Examples:
-      | url                            | expected               |
-      | /get?name=api&test=true        | /get?name=api          |
-      | /get?user=bharath&id=101       | /get?user=bharath      |
-      | /get?search=automation&lang=en | /get?search=automation |
-
+  | url                            | expected                              |
+  |--------------------------------|--------------------------------------|
+  | /get?name=api&test=true        | /get?name=api&test=true              |
+  | /get?user=bharath&id=101       | /get?user=bharath&id=101             |
+  | /get?search=automation&lang=en | /get?search=automation&lang=en       |
 
 
   Scenario: Verify redirect using Excel test data
