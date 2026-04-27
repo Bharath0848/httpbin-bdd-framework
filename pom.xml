@@ -33,7 +33,6 @@
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-testng</artifactId>
             <version>7.14.0</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- TESTNG -->
@@ -41,7 +40,6 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.7.1</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- JSON SCHEMA -->
@@ -97,6 +95,13 @@
         <artifactId>extentreports-cucumber7-adapter</artifactId>
         <version>1.14.0</version>
     </dependency>
+
+    <dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.30</version> <!-- or latest -->
+    <scope>provided</scope>
+</dependency>
 
 </dependencies>
 

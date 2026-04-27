@@ -3,21 +3,15 @@ Feature: HTTP Delay Endpoint Validation using HttpBin
   Background:
     Given base URL is set
 
+    Scenario: Validate Digest Authentication behavior
+    When I send Digest Auth request with valid username and password 
+    Then response status code should be equal to 200
+
+
 Scenario: User receives delayed response based on Excel data
   Given base URL is set
   When user sends delay requests from excel "Exceldata.xlsx"
  
-  # Scenario Outline: User receives delayed response based on requested wait time
-  #   When user sends "<method>" request of "/delay/<seconds>"
-  #   Then response status code should be equal to 200
-  #   And response time should be between <min> and <max> seconds
-
-  #   Examples:
-  #     | method | seconds | min | max |
-  #     | GET    | 5       | 4   | 7   |
-  #     | GET    | 9       |8    | 10  |
-  #     | POST   | 2       | 1   | 4   |
-
 
   Scenario Outline: Validate delay endpoint with decimal and negative values
     When user sends "<method>" request of "/delay/<value>"
