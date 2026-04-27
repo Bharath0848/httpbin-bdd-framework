@@ -56,7 +56,6 @@ public class Step_Def_HttpMethods {
         assertEquals(response.jsonPath().getString("args.role"), expRole);
     }
 
-    
     @When("user sends POST request with below data")
     public void sendPostRequest(DataTable dataTable) {
 
