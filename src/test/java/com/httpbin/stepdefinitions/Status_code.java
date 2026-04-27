@@ -10,23 +10,32 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+
 import io.cucumber.datatable.DataTable;
+
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
+import com.httpbin.utils.ConfigReader;
+import com.httpbin.utils.ExcelUtility;
 
 public class Status_code {
 
-    private Response response;
-    private int chainedStatusCode;
+    Response response;
+    int chainedStatusCode;
+    ExcelUtility eUtil = new ExcelUtility();
 
     @Given("the base url of httpbin")
     public void set_base_url() {
-        baseURI = "https://httpbin.org/status";
+        ConfigReader.loadConfig();
+        baseURI = ConfigReader.get("base_url") + "/status";
     }
 
     @When("the post request is sent with status code {int}")
     public void sent_post_request(int code) {
         response = given()
-                .auth().oauth2("mytoken")
+                .auth().oauth2(ConfigReader.get("bearer_token"))
                 .contentType(ContentType.JSON)
                 .body("{\"post\":\"applied\"}")
                 .pathParam("code", code)
@@ -37,13 +46,14 @@ public class Status_code {
     @When("the get request is sent with status code {int}")
     public void sent_get_request(int code) {
         response = given()
-                .auth().basic("admin", "admin@123")
+                .auth().basic(
+                        ConfigReader.get("username"),
+                        ConfigReader.get("password"))
                 .pathParam("code", code)
         .when()
                 .get("/{code}");
 
         chainedStatusCode = response.getStatusCode();
-       
     }
 
     @When("the put request is sent with chained status code and below data")
@@ -54,27 +64,34 @@ public class Status_code {
         String codes = chainedStatusCode + "," + secondCode;
 
         response = given()
-                .auth().oauth2("mytoken")
+                .auth().oauth2(ConfigReader.get("bearer_token"))
                 .contentType(ContentType.JSON)
                 .body("{\"put\":\"applied\"}")
                 .pathParam("codes", codes)
         .when()
                 .put("/{codes}");
     }
+
     @When("the patch request is sent without status code")
     public void sent_patch_request() {
         response = given()
-                .auth().oauth2("mytoken")
+                .auth().oauth2(ConfigReader.get("bearer_token"))
                 .contentType(ContentType.JSON)
                 .body("{\"patch\":\"applied\"}")
         .when()
                 .patch("/");
     }
 
-    @When("the delete request is sent with status code {int}")
-    public void sent_delete_request(int code) {
+    @When("the delete request is sent using excel data {string}")
+    public void sent_delete_request_excel(String sheetName) throws IOException {
+
+        List<Map<String, String>> data = eUtil.getSheetData(sheetName);
+        int code = Integer.parseInt(data.get(0).values().iterator().next());
+
         response = given()
-                .auth().basic("admin", "admin@123")
+                .auth().basic(
+                        ConfigReader.get("username"),
+                        ConfigReader.get("password"))
                 .pathParam("code", code)
         .when()
                 .delete("/{code}");

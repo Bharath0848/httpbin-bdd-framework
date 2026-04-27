@@ -31,7 +31,7 @@ Scenario: Verify PATCH status with invalid code
   Then we get the response code as 404
   And the response time is less than 4000 ms
 
-Scenario: Verify DELETE status with no content code
-  When the delete request is sent with status code 204
+Scenario: Verify DELETE status code with valid data
+  When the delete request is sent using excel data "Sheet1"
   Then we get the response code as 204
   And the response time is less than 4000 ms
