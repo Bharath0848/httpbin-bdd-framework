@@ -2,7 +2,6 @@ package com.httpbin.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -11,7 +10,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelUtility {
 
-    private final String filePath = "./src/test/resources/ExcelFiles/data.xlsx";
+    // UPDATED: Path matches your screenshot (src/test/resources/testData/Exceldata.xlsx)
+    private final String filePath = System.getProperty("user.dir") + "/src/test/resources/testData/Exceldata.xlsx";
 
     public String getCellDataByKey(String sheetName, String key, int valueColumn) throws IOException {
 
@@ -41,10 +41,7 @@ public class ExcelUtility {
                     }
                 }
             }
-
             throw new RuntimeException("Key not found in sheet: " + key);
         }
     }
 }
-
-
