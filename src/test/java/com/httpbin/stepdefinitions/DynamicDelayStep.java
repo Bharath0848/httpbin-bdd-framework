@@ -2,6 +2,7 @@ package com.httpbin.stepdefinitions;
 
 import com.httpbin.managers.ScenarioContext;
 import com.httpbin.utils.ConfigReader;
+import com.httpbin.utils.ExcelUtility;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -10,6 +11,10 @@ import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import static org.testng.Assert.*;
+
+import java.util.List;
+import java.util.Map;
+
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 
@@ -23,6 +28,25 @@ public class DynamicDelayStep {
         baseurl=ConfigReader.get("base_url");
         RestAssured.baseURI = baseurl;
     }
+    
+   @When("I send Digest Auth request with valid username and password")
+public void sendDigestAuthRequest() {
+
+    String username = ConfigReader.get("username");
+    String password = ConfigReader.get("password");
+
+    response = RestAssured
+            .given()
+            .auth()
+            .digest(username, password)
+            .log().all()
+            .when()
+            .get(baseurl + "/digest-auth/auth/" + username + "/" + password);
+
+    System.out.println("Actual Status Code: " + response.getStatusCode());
+}
+
+
     @When("user sends {string} request with delay {string} and payload {string}")
 public void user_sends_request_with_delay_and_payload(String method, String delay, String payload) {
 
@@ -33,12 +57,40 @@ public void user_sends_request_with_delay_and_payload(String method, String dela
     response = RestAssured
             .given()
             .contentType("application/json")
+            .auth().digest(ConfigReader.get("username"), ConfigReader.get("password"))
             .pathParam("time", delay)   
             .body(actualPayload)
             .when()
             .request(method, com.httpbin.endpoints.Routes.DELAY);
 
     response.then().log().all();}
+
+    @When("user sends delay requests from excel {string}")
+public void user_sends_delay_requests_from_excel(String fileName) throws Exception {
+
+    ExcelUtility excel = new ExcelUtility();
+
+   
+    List<Map<String, String>> dataList = excel.getSheetData("Sheet3");
+    System.out.println(dataList);
+    for (Map<String, String> row : dataList) {
+
+        String method = row.get("method");
+        String seconds = row.get("seconds ");
+        int min = Integer.parseInt(row.get("min"));
+        int max = Integer.parseInt(row.get("max"));
+
+        System.out.println("Executing: " + method + " /delay/" + seconds);
+
+        sendRequest(method, "/delay/" + seconds);
+        long time = responseTime / 1000;
+        int lBound = min - 1;
+        int uBound = max + 2;
+
+         assertTrue(time >= lBound && time <= uBound,
+            "Response time not in expected range: " + time);
+    
+    }}
 
     @When("user sends {string} request of {string}")
     public void sendRequest(String method, String endpoint) {
@@ -91,12 +143,12 @@ public void validateStatusCode(int expectedCode) {
     @Then("response time should be between {int} and {int} seconds")
     public void validateResponseTime(int min, int max) {
 
-        long timeInSeconds = responseTime / 1000;
+        long time = responseTime / 1000;
 
-        System.out.println("Response Time (seconds): " + timeInSeconds);
+        System.out.println("Response Time (seconds): " + time);
 
-        assertTrue(timeInSeconds >= min && timeInSeconds <= max,
-                "Response time not in expected range: " + timeInSeconds);
+        assertTrue(time >= min && time <= max,
+                "Response time not in expected range: " + time);
     }
 
     @Then("response should be handled correctly for {string}")

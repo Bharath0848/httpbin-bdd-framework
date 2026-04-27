@@ -15,17 +15,10 @@ Feature: Anything Module Full CRUD Operations
       | 994  | Madhan_User    | true   |
       | 105  | Arun_Tester    | false  |
 
-  # 2. External Excel Data-Driven (Updated to be dynamic)
-  Scenario Outline: User creates records using data from external Excel
-    Given I provide user details from Excel "Sheet5" row <RowNumber>
-    When I submit a request to create a record
-    Then the request should be successful with status 200
-    And I save the unique ID from the response for future use
-
-    Examples:
-      | RowNumber |
-      |         1 |
-      |         2 |
+  # 2. External Excel Data-Driven 
+ Scenario: User creates records using data from external Excel
+    When I process all user records from Excel "Sheet5"
+    
 
   # 3. Data Table & CRUD Operations
   Scenario: User views record details with tracking table

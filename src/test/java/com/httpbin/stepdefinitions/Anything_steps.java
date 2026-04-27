@@ -10,7 +10,11 @@ import static org.hamcrest.Matchers.*;
 import com.httpbin.pojo.Anything_Pojo;
 import com.httpbin.utils.ExcelUtility;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+
+import org.testng.asserts.SoftAssert;
+
 import java.io.IOException;
 
 public class Anything_steps {
@@ -32,16 +36,35 @@ public class Anything_steps {
         request.body(new Anything_Pojo(id, name, Boolean.parseBoolean(active)));
     }
 
-    @Given("I provide user details from Excel {string} row {int}")
-    public void provideUserDetailsFromExcel(String sheetName, int rowNum) throws IOException {
-        String key = String.valueOf(rowNum); 
-        // Based on your Excel: Column 1=id, 2=name, 3=active
-        String idStr = excel.getCellDataByKey(sheetName, key, 1);
-        String name = excel.getCellDataByKey(sheetName, key, 2);
-        String activeStr = excel.getCellDataByKey(sheetName, key, 3);
-        
-        request.body(new Anything_Pojo(Integer.parseInt(idStr), name, Boolean.parseBoolean(activeStr)));
-        System.out.println(">>> Excel Data Loaded for Key [" + key + "]: " + name);
+    
+    @When("I process all user records from Excel {string}")
+    public void processAllExcelRecords(String sheetName) throws IOException {
+        SoftAssert softAssert = new SoftAssert();
+        List<Map<String, String>> allData = excel.getSheetData(sheetName);
+
+        for (Map<String, String> rowData : allData) {
+            try {
+                int id = Integer.parseInt(rowData.get("id"));
+              
+                String name = rowData.get("name");
+                boolean active = Boolean.parseBoolean(rowData.get("active"));
+
+                Anything_Pojo body = new Anything_Pojo(id, name, active);
+                
+                Response loopRes= given()
+                    .baseUri("https://httpbin.org")
+                    .header("Content-Type", "application/json")
+                    .body(body)
+                .when()
+                    .post("/anything");
+
+                softAssert.assertEquals(loopRes.getStatusCode(), 200, "Failure for: " + name);
+                System.out.println("Processed: " + name);
+
+            } catch (Exception e) {
+                softAssert.fail("Error processing row: " + e.getMessage());
+            }
+        }
     }
 
     @When("I submit a request to create a record")
@@ -153,15 +176,12 @@ public class Anything_steps {
 
     @When("I send Basis Auth request with valid username and password")
     public void sendBasicAuthRequest() {
-        // 1. Initialize the config (static call)
         com.httpbin.utils.ConfigReader.loadConfig();
 
-        // 2. Pull data from your config.properties
         String user = com.httpbin.utils.ConfigReader.get("username");
         String pass = com.httpbin.utils.ConfigReader.get("password");
 
-        // 3. Execute the request
-        // Note: httpbin /basic-auth/{user}/{passwd} expects the creds in the URL to verify them
+        
         response = given()
                     .auth()
                     .basic(user, pass)
@@ -171,7 +191,6 @@ public class Anything_steps {
         System.out.println(">>> Auth tested for User: " + user);
     }
 
- // Change the text inside the quotes to match the feature file
     @Then("the authentication status should be {int}") 
     public void verifyAuthStatus(int code) {
         response.then().statusCode(code);

@@ -12,6 +12,8 @@ public class RequestBuilder {
     }
 
     public static RequestSpecification getRequest(boolean followRedirects) {
+    	 String token = ConfigReader.get("bearer_token");
+    	 
         request = RestAssured
                 .given()
                 .relaxedHTTPSValidation()
@@ -20,4 +22,12 @@ public class RequestBuilder {
 
         return request;
     }
+    public static RequestSpecification getRequestBearer() {
+   	 String token = ConfigReader.get("bearer_token");
+   	 
+       request = RestAssured
+               .given().header("Authorization", "Bearer " + token); 
+
+       return request;
+   }
 }

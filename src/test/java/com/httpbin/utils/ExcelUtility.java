@@ -2,6 +2,11 @@ package com.httpbin.utils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -10,38 +15,38 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelUtility {
 
-    // UPDATED: Path matches your screenshot (src/test/resources/testData/Exceldata.xlsx)
-    private final String filePath = System.getProperty("user.dir") + "/src/test/resources/testData/Exceldata.xlsx";
+    private final String filePath = "./src/test/resources/testData/Exceldata.xlsx";
 
-    public String getCellDataByKey(String sheetName, String key, int valueColumn) throws IOException {
+   public List<Map<String, String>> getSheetData(String sheetName) throws IOException {
 
-        try (FileInputStream fis = new FileInputStream(filePath);
-             Workbook workbook = new XSSFWorkbook(fis)) {
+    List<Map<String, String>> dataList = new ArrayList<>();
 
-            Sheet sheet = workbook.getSheet(sheetName);
+    try (FileInputStream fis = new FileInputStream(filePath);
+         Workbook workbook = new XSSFWorkbook(fis)) {
 
-            if (sheet == null) {
-                throw new RuntimeException("Sheet not found: " + sheetName);
+        Sheet sheet = workbook.getSheet(sheetName);
+
+        DataFormatter formatter = new DataFormatter();
+
+        Row headerRow = sheet.getRow(0);
+
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+            Row row = sheet.getRow(i);
+            Map<String, String> data = new HashMap<>();
+
+            for (int j = 0; j < headerRow.getLastCellNum(); j++) {
+
+                String key = formatter.formatCellValue(headerRow.getCell(j));
+                String value = formatter.formatCellValue(row.getCell(j));
+
+                data.put(key, value);
             }
 
-            DataFormatter formatter = new DataFormatter();
-
-            for (int i = 0; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-
-                if (row != null && row.getCell(0) != null) {
-                    String cellKey = formatter.formatCellValue(row.getCell(0));
-
-                    if (key.equalsIgnoreCase(cellKey)) {
-                        if (row.getCell(valueColumn) != null) {
-                            return formatter.formatCellValue(row.getCell(valueColumn));
-                        } else {
-                            return null;
-                        }
-                    }
-                }
-            }
-            throw new RuntimeException("Key not found in sheet: " + key);
+            dataList.add(data);
         }
     }
+
+    return dataList;
+}
 }
