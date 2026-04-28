@@ -31,7 +31,6 @@
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-testng</artifactId>
             <version>7.14.0</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- TESTNG -->
@@ -39,7 +38,6 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>7.7.1</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- JSON SCHEMA -->

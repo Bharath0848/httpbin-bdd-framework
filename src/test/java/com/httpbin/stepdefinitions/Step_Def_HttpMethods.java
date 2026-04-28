@@ -1,15 +1,13 @@
 package com.httpbin.stepdefinitions;
 
 import io.cucumber.java.en.*;
+
 import io.cucumber.datatable.DataTable;
 import io.restassured.response.Response;
-
 import com.httpbin.utils.ConfigReader;
 import com.httpbin.utils.ExcelUtility;
-
 import java.io.IOException;
 import java.util.*;
-
 import static io.restassured.RestAssured.*;
 import static org.testng.Assert.*;
 
@@ -17,15 +15,12 @@ public class Step_Def_HttpMethods {
 
     String baseUrl;
     Response response;
-
     String name;
     String role;
-
     String username;
     String password;
     String token;
 
-    
     public Step_Def_HttpMethods() {
         ConfigReader.loadConfig();
         username = ConfigReader.get("username");
@@ -33,25 +28,21 @@ public class Step_Def_HttpMethods {
         token = ConfigReader.get("bearer_token");
     }
 
-    @Given("HTTPBin base URL is set to {string}")
-    public void setBaseUrl(String url) {
-        baseUrl = url;
+    @Given("HTTPBin base URL is already set")
+    public void setBaseUrl() {
+        baseUrl = ConfigReader.get("base_url");
     }
 
-    
     @When("user sends GET request to {string}")
     public void sendGetRequest(String endpoint) {
-
         response = given()
                 .auth().basic(username, password)
-                .header("Authorization", "Bearer " + token)
                 .when()
                 .get(baseUrl + endpoint);
     }
 
     @Then("response args will have name {string} and role {string}")
     public void validateGetResponse(String expName, String expRole) {
-
         assertEquals(response.jsonPath().getString("args.name"), expName);
         assertEquals(response.jsonPath().getString("args.role"), expRole);
     }
@@ -62,7 +53,6 @@ public class Step_Def_HttpMethods {
         Map<String, String> body = dataTable.asMaps().get(0);
 
         response = given()
-                .auth().basic(username, password)
                 .header("Authorization", "Bearer " + token)
                 .header("Content-Type", "application/json")
                 .body(body)
@@ -78,7 +68,6 @@ public class Step_Def_HttpMethods {
         assertNotNull(response.jsonPath().get("json"));
     }
 
-    
     @When("user sends PUT request to {string} with name {string} and role {string}")
     public void sendPutRequest(String endpoint, String inputName, String inputRole) {
 
@@ -91,7 +80,6 @@ public class Step_Def_HttpMethods {
 
         response = given()
                 .auth().basic(username, password)
-                .header("Authorization", "Bearer " + token)
                 .header("Content-Type", "application/json")
                 .body(body)
                 .when()
@@ -103,12 +91,10 @@ public class Step_Def_HttpMethods {
         assertEquals(response.jsonPath().getString("json.role"), expectedRole);
     }
 
-   
     @When("user sends PATCH request to {string} with invalid data")
     public void sendPatchRequest(String endpoint) {
 
         response = given()
-                .auth().basic(username, password)
                 .header("Authorization", "Bearer " + token)
                 .header("Content-Type", "application/json")
                 .body("{ invalid json }")
@@ -118,9 +104,8 @@ public class Step_Def_HttpMethods {
 
     @Then("response will handle invalid input")
     public void validatePatchResponse() {
-        assertTrue(response.getStatusCode() >= 200);
+        assertEquals(response.getStatusCode(), 200);
     }
-
 
     @When("user sends DELETE request using Excel data")
     public void sendDeleteUsingExcel() throws IOException {
@@ -128,32 +113,25 @@ public class Step_Def_HttpMethods {
         ExcelUtility excel = new ExcelUtility();
         List<Map<String, String>> dataList = excel.getSheetData("Sheet2");
 
-       
-        name = dataList.get(0).get("value");   
-        role = dataList.get(1).get("value");   
+        name = dataList.get(0).get("value");
+        role = dataList.get(1).get("value");
 
         response = given()
+                .auth().basic(username, password)
                 .queryParam("name", name)
                 .queryParam("role", role)
                 .when()
                 .delete(baseUrl + "/delete");
-
     }
 
     @Then("response args will match name and role from Excel data")
     public void validateDeleteResponseFromExcel() {
-
         assertEquals(response.jsonPath().getString("args.name"), name);
         assertEquals(response.jsonPath().getString("args.role"), role);
     }
 
     @Then("response time will be less than {int} ms")
     public void validateResponseTime(int time) {
-
-        long actualTime = response.getTime();
-        System.out.println("Response Time: " + actualTime);
-
-        assertTrue(actualTime < time + 4000, 
-            "Response time too high: " + actualTime + " ms");
+        assertTrue(response.getTime()< time);
     }
 }
