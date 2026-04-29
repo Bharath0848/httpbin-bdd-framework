@@ -1,7 +1,7 @@
 Feature: Validate HTTP methods behavior using httpbin
 
 Background:
-  Given HTTPBin base URL is set to "https://httpbin.org"
+  Given HTTPBin base URL is already set 
 
 
 Scenario Outline: Validate GET request with different inputs
@@ -19,6 +19,7 @@ Scenario: Validate POST request payload using DataTable
   When user sends POST request with below data
     | name  | role   |
     | arthi | tester |
+    | john  | dev    |
   Then response json will match sent payload
   And response time will be less than 3000 ms
 
