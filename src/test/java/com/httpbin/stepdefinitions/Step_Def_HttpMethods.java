@@ -71,9 +71,10 @@ public class Step_Def_HttpMethods {
     @When("user sends PUT request to {string} with name {string} and role {string}")
     public void sendPutRequest(String endpoint, String inputName, String inputRole) {
 
-        name = inputName;
+    	 if (name == null || role == null) {
+    	name = inputName;
         role = inputRole;
-
+    	 }
         Map<String, String> body = new HashMap<>();
         body.put("name", name);
         body.put("role", role);
