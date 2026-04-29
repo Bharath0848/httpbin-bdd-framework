@@ -1,5 +1,6 @@
 package com.httpbin.stepdefinitions;
 
+import com.httpbin.endpoints.Routes;
 import com.httpbin.managers.ScenarioContext;
 
 
@@ -101,9 +102,9 @@ public class RedirectSteps {
     }
 
     
-    @When("user sends request to {string} using test data")
-    public void sendRequestUsingExcel(String endpoint) throws Exception {
-
+    @When("user sends request to endpoint using test data")
+    public void sendRequestUsingExcel() throws Exception {
+    	String endpoint=Routes.REDIRECT;
         List<Map<String, String>> dataList = new ExcelUtility().getSheetData("Sheet4");
         SoftAssert softAssert = new SoftAssert();
 

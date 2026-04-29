@@ -40,7 +40,7 @@ Scenario Outline: Verify redirect with different query parameter combinations
 
 #Excel driven-CRUD
   Scenario: Verify redirect using Excel test data
-    When user sends request to "/redirect-to" using test data
+    When user sends request to endpoint using test data
 
 
  
