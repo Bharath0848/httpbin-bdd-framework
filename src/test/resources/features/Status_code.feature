@@ -23,7 +23,7 @@ Scenario: Verify PUT status with multiple codes
   And the put request is sent with chained status code and below data
     | secondCode |
     | 500        |
-  Then we get the response code as either chained status code or 500
+  Then we get the response code as either chained status code or second code
   And the response time is less than 4000 ms
 
 Scenario: Verify PATCH status with invalid code
