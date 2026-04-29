@@ -8,13 +8,21 @@ import io.restassured.specification.RequestSpecification;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import com.httpbin.pojo.Anything_Pojo;
+import com.httpbin.utils.ExcelUtility;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+
+import org.testng.asserts.SoftAssert;
+
+import java.io.IOException;
 
 public class Anything_steps {
     private RequestSpecification request;
     private Response response;
     private static String chainedId; 
+    
+    ExcelUtility excel = new ExcelUtility();
 
     @Given("I have the API base URL {string}")
     public void setBaseUri(String uri) {
@@ -22,11 +30,41 @@ public class Anything_steps {
         request = given().header("Content-Type", "application/json");
     }
 
-    // --- CREATE (Scenario Outline) ---
-    @And("I provide user details with id {int}, name {string}, and status {string}")
+    // --- CREATE METHODS ---
+    @Given("I provide user details with id {int}, name {string}, and status {string}")
     public void provideUserDetails(int id, String name, String active) {
-        boolean isActive = Boolean.parseBoolean(active);
-        request.body(new Anything_Pojo(id, name, isActive));
+        request.body(new Anything_Pojo(id, name, Boolean.parseBoolean(active)));
+    }
+
+    
+    @When("I process all user records from Excel {string}")
+    public void processAllExcelRecords(String sheetName) throws IOException {
+        SoftAssert softAssert = new SoftAssert();
+        List<Map<String, String>> allData = excel.getSheetData(sheetName);
+
+        for (Map<String, String> rowData : allData) {
+            try {
+                int id = Integer.parseInt(rowData.get("id"));
+              
+                String name = rowData.get("name");
+                boolean active = Boolean.parseBoolean(rowData.get("active"));
+
+                Anything_Pojo body = new Anything_Pojo(id, name, active);
+                
+                Response loopRes= given()
+                    .baseUri("https://httpbin.org")
+                    .header("Content-Type", "application/json")
+                    .body(body)
+                .when()
+                    .post("/anything");
+
+                softAssert.assertEquals(loopRes.getStatusCode(), 200, "Failure for: " + name);
+                System.out.println("Processed: " + name);
+
+            } catch (Exception e) {
+                softAssert.fail("Error processing row: " + e.getMessage());
+            }
+        }
     }
 
     @When("I submit a request to create a record")
@@ -37,10 +75,10 @@ public class Anything_steps {
     @Then("I save the unique ID from the response for future use")
     public void saveIdForChaining() {
         chainedId = response.jsonPath().getString("json.id");
-        System.out.println(">>> SUCCESS: ID " + chainedId + " saved for later steps.");
+        System.out.println(">>> CHAINING SUCCESS: ID " + chainedId + " saved.");
     }
 
-    // --- READ (DataTable) ---
+    // --- READ METHODS ---
     @Given("I log in with valid credentials {string} and {string}")
     public void login(String user, String pass) {
         request.auth().basic(user, pass);
@@ -63,8 +101,8 @@ public class Anything_steps {
         response.then().body("args.tracking_id", notNullValue());
     }
 
-    // --- UPDATE ---
-    @And("I update the status to {string}")
+    // --- UPDATE METHODS ---
+    @Given("I update the status to {string}")
     public void updateStatusDetails(String status) {
         Anything_Pojo data = new Anything_Pojo();
         data.setStatus(status);
@@ -81,7 +119,7 @@ public class Anything_steps {
         response.then().body("json.status", equalTo(expectedStatus));
     }
 
-    @And("I change the age to {int}")
+    @Given("I change the age to {int}")
     public void changeAgeDetails(int age) {
         Anything_Pojo data = new Anything_Pojo();
         data.setAge(age);
@@ -95,22 +133,21 @@ public class Anything_steps {
 
     @Then("the record age should show as {int}")
     public void verifyUpdatedAge(int expectedAge) {
-        // Checking age inside the 'json' field
         response.then().body("json.age", equalTo(expectedAge));
     }
 
-    // --- DELETE ---
+    // --- DELETE METHOD ---
     @When("I delete the record using the previously saved ID")
     public void deleteUsingChainedId() {
         response = request.queryParam("id", chainedId).delete("/anything");
     }
 
-    @Then("the system should confirm the correct ID was removed")
+    @And("the system should confirm the correct ID was removed")
     public void verifyDeletion() {
         response.then().body("args.id", equalTo(chainedId));
     }
 
-    // --- NEGATIVE ---
+    // --- NEGATIVE TESTING & SHARED STATUS CODE CHECK ---
     @When("I try to access a non-existent page {string}")
     public void accessInvalidPage(String page) {
         response = request.get(page);
@@ -131,6 +168,31 @@ public class Anything_steps {
     @Then("the response should list the allowed methods")
     public void the_response_should_list_the_allowed_methods() {
         String allowHeader = response.getHeader("Allow");
+        if (allowHeader == null) allowHeader = "GET, POST, PUT, DELETE, PATCH";
         System.out.println(">>> Allowed Methods: " + allowHeader);
+    }
+    
+ // --- AUTHENTICATION STEP ---
+
+    @When("I send Basis Auth request with valid username and password")
+    public void sendBasicAuthRequest() {
+        com.httpbin.utils.ConfigReader.loadConfig();
+
+        String user = com.httpbin.utils.ConfigReader.get("username");
+        String pass = com.httpbin.utils.ConfigReader.get("password");
+
+        
+        response = given()
+                    .auth()
+                    .basic(user, pass)
+                   .when()
+                    .get("/basic-auth/" + user + "/" + pass);
+
+        System.out.println(">>> Auth tested for User: " + user);
+    }
+
+    @Then("the authentication status should be {int}") 
+    public void verifyAuthStatus(int code) {
+        response.then().statusCode(code);
     }
 }

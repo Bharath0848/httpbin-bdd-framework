@@ -4,7 +4,9 @@ import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
 
 @CucumberOptions(
+
     features = "src/test/resources/features/Status_code.feature ",
+
     glue = {"com.httpbin.stepdefinitions", "com.httpbin.hooks"},
     plugin = {
         "pretty",
@@ -16,5 +18,4 @@ import io.cucumber.testng.CucumberOptions;
     publish = true
 )
 public class TestRunner extends AbstractTestNGCucumberTests {
-
 }

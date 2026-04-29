@@ -3,9 +3,9 @@ Feature: Anything Module Full CRUD Operations
   Background:
     Given I have the API base URL "https://httpbin.org"
 
-  # 1. Using Scenario Outline (Data-Driven)
+  # 1. Internal Data-Driven (Scenario Outline)
   Scenario Outline: User creates a new record and saves the ID
-    And I provide user details with id <id>, name "<name>", and status "<active>"
+    Given I provide user details with id <id>, name "<name>", and status "<active>"
     When I submit a request to create a record
     Then the request should be successful with status 200
     And I save the unique ID from the response for future use
@@ -15,7 +15,12 @@ Feature: Anything Module Full CRUD Operations
       | 994  | Madhan_User    | true   |
       | 105  | Arun_Tester    | false  |
 
-  # 2. Using DataTable (Grouped Parameters)
+  # 2. External Excel Data-Driven 
+ Scenario: User creates records using data from external Excel
+    When I process all user records from Excel "Sheet5"
+    
+
+  # 3. Data Table & CRUD Operations
   Scenario: User views record details with tracking table
     Given I log in with valid credentials "user" and "pass"
     And I include the following tracking details:
@@ -28,13 +33,13 @@ Feature: Anything Module Full CRUD Operations
     And the response should display the correct tracking ID
 
   Scenario: User updates all information for a record
-    And I update the status to "Updated_Batch5"
+    Given I update the status to "Updated_Batch5"
     When I submit the update request
     Then the request should be successful with status 200
     And the record status should show as "Updated_Batch5"
 
   Scenario: User updates only the age of a record
-    And I change the age to 28
+    Given I change the age to 28
     When I submit the partial update request
     Then the request should be successful with status 200
     And the record age should show as 28
@@ -44,9 +49,15 @@ Feature: Anything Module Full CRUD Operations
     Then the request should be successful with status 200
     And the system should confirm the correct ID was removed
 
+  # 4. Negative Testing
   Scenario: User verifies system behavior for invalid requests
     When I try to access a non-existent page "/anythin"
     Then I should receive a 404 Not Found error
     When I use the wrong method for the status page
     Then I should receive a 405 Method Not Allowed error
     And the response should list the allowed methods
+ 
+ 
+  Scenario: Validate Basic Authentication behavior
+    When I send Basis Auth request with valid username and password 
+    Then the authentication status should be 200
