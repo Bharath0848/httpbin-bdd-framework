@@ -1,6 +1,8 @@
 package com.httpbin.stepdefinitions;
 
 import io.cucumber.java.en.Given;
+
+
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.http.ContentType;
@@ -24,6 +26,7 @@ public class Status_code {
 
     Response response;
     int chainedStatusCode;
+    int secondCode;
     ExcelUtility eUtil = new ExcelUtility();
 
     @Given("the base url of httpbin")
@@ -46,7 +49,7 @@ public class Status_code {
     @When("the get request is sent with status code {int}")
     public void sent_get_request(int code) {
         response = given()
-                .auth().basic(
+               .auth().basic(
                         ConfigReader.get("username"),
                         ConfigReader.get("password"))
                 .pathParam("code", code)
@@ -58,8 +61,10 @@ public class Status_code {
 
     @When("the put request is sent with chained status code and below data")
     public void sent_put_request_with_table(DataTable table) {
-        List<List<String>> data = table.cells();
-        int secondCode = Integer.parseInt(data.get(1).get(0));
+
+        List<Map<String, String>> data = table.asMaps(String.class, String.class);
+
+        secondCode = Integer.parseInt(data.get(0).get("secondCode"));
 
         String codes = chainedStatusCode + "," + secondCode;
 
@@ -87,6 +92,7 @@ public class Status_code {
 
         List<Map<String, String>> data = eUtil.getSheetData(sheetName);
         int code = Integer.parseInt(data.get(0).values().iterator().next());
+        
 
         response = given()
                 .auth().basic(
@@ -102,8 +108,8 @@ public class Status_code {
         response.then().statusCode(code);
     }
 
-    @Then("we get the response code as either chained status code or {int}")
-    public void validate_multiple_status_code(int secondCode) {
+    @Then("we get the response code as either chained status code or second code")
+    public void validate_multiple_status_code() {
         response.then().statusCode(anyOf(is(chainedStatusCode), is(secondCode)));
     }
 
