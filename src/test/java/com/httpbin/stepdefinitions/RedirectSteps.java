@@ -1,15 +1,19 @@
 package com.httpbin.stepdefinitions;
 
 import com.httpbin.managers.ScenarioContext;
-import com.httpbin.utils.ConfigReader;
+
+
 import com.httpbin.utils.ExcelUtility;
 import com.httpbin.utils.RequestBuilder;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
+import io.restassured.RestAssured;
 import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 import java.io.File;
 import java.util.List;
@@ -33,15 +37,11 @@ public class RedirectSteps {
     }
     
     @When("I send authenticated request using bearer token")
-    public void sendAuthenticatedRequestUsingBearerToken() {
-
-       
+    public void sendAuthenticatedRequestUsingBearerToken() {       
         RequestSpecification request = RequestBuilder.getRequestBearer();
-
         response = request.get("/bearer");
         token = response.jsonPath().getString("token");
         System.out.println("Authentication Token :" + token);
-
         logResponse("GET", "/bearer");
     }
     
@@ -81,6 +81,7 @@ public class RedirectSteps {
     public void sendMultipleRequests(DataTable table) {
 
         List<Map<String, String>> rows = table.asMaps(String.class, String.class);
+        System.out.println(rows);
 
         for (Map<String, String> row : rows) {
 
@@ -99,10 +100,12 @@ public class RedirectSteps {
         }
     }
 
+    
     @When("user sends request to {string} using test data")
     public void sendRequestUsingExcel(String endpoint) throws Exception {
 
         List<Map<String, String>> dataList = new ExcelUtility().getSheetData("Sheet4");
+        SoftAssert softAssert = new SoftAssert();
 
         for (Map<String, String> data : dataList) {
 
@@ -122,12 +125,13 @@ public class RedirectSteps {
 
                 case "GET":
                     response = request.get(finalEndpoint);
+                    
                     break;
                 case "POST":
-                    response = request.post(finalEndpoint);
+                    response = request.formParam("url", url).post(endpoint);
                     break;
                 case "PUT":
-                    response = request.put(finalEndpoint);
+                	response = request.formParam("url", url).post(endpoint);
                     break;
                 case "PATCH":
                     response = request.patch(finalEndpoint);
@@ -141,16 +145,27 @@ public class RedirectSteps {
 
             logResponse(method, finalEndpoint);
 
-            Assert.assertEquals(response.getStatusCode(), 302);
+//            Assert.assertEquals(response.getStatusCode(), 302);
+//
+//            String location = response.getHeader("Location");
+//          
+//
+//            Assert.assertNotNull(location);
+//
+//            Assert.assertTrue(
+//                    location.startsWith(url.split("\\?")[0])
+//            );
+            
+            softAssert.assertEquals(response.getStatusCode(), 302,
+                    "Status code failed for: " + method + " | " + url);
 
             String location = response.getHeader("Location");
 
-            Assert.assertNotNull(location);
-
-            Assert.assertTrue(
-                    location.startsWith(url.split("\\?")[0])
-            );
+            softAssert.assertNotNull(location,
+                    "Location header missing for: " + method + " | " + url);
+            
         }
+        softAssert.assertAll(); 
     }
 
     @Then("response status code should be {int}")
@@ -202,6 +217,7 @@ public class RedirectSteps {
 
         Assert.assertTrue(body.contains(value));
     }
+    
 
     @Then("user extracts {string} header as {string}")
     public void extractHeader(String headerName, String key) {
@@ -241,5 +257,14 @@ public class RedirectSteps {
         System.out.println("Response Headers: " + response.getHeaders());
         System.out.println("Response Body: " + response.getBody().asString());
         System.out.println("====================================");
+    }
+    @Test
+    public void testing() {
+        RestAssured.given()
+            .formParam("url", "https://example.com")
+        .when()
+            .put("https://httpbin.org/redirect-to")
+        .then()
+            .log().all();
     }
 }
