@@ -1,20 +1,22 @@
-Feature: Redirect behavior validation using /redirect-to endpoint
+#Author: Bharath
+#Module: Redirect
+#=====================
 
+Feature: Redirect behavior validation using /redirect-to endpoint
   Background:
     Given base URL is set to "https://httpbin.org"
     And auto redirect is disabled
 
 
 
-
+#Authentication
  Scenario: Validate Bearer Authentication with configured token
   When I send authenticated request using bearer token
   Then response status code should be 200
 
 
 
-
-
+#DataTable
   Scenario: Verify redirect for multiple relative URLs
     When user sends GET request with following URLs
       | url            |
@@ -22,11 +24,8 @@ Feature: Redirect behavior validation using /redirect-to endpoint
       | /status/200    |
       | /anything/test |
     Then response status code should be 302
-
-
  
-
-        
+#Scenario Outline
 Scenario Outline: Verify redirect with different query parameter combinations
     When user sends "GET" request to "/redirect-to?url=<url>"
     Then response status code should be 302
@@ -39,12 +38,12 @@ Scenario Outline: Verify redirect with different query parameter combinations
   | /get?search=automation&lang=en | /get?search=automation&lang=en       |
 
 
+#Excel driven-CRUD
   Scenario: Verify redirect using Excel test data
     When user sends request to "/redirect-to" using test data
 
 
-  
-
+ 
   Scenario: Verify redirect for valid relative URL
     When user sends "GET" request to "/redirect-to?url=/get"
     Then response status code should be 302
@@ -61,7 +60,7 @@ Scenario Outline: Verify redirect with different query parameter combinations
     And response header "Location" should not be null
 
 
- 
+ #Negative
 
   Scenario: Verify behavior when URL parameter is missing
     When user sends "GET" request to "/redirect-to"
@@ -83,8 +82,7 @@ Scenario Outline: Verify redirect with different query parameter combinations
     And final response should not contain "/get" response body
 
 
-
-
+#schema and chaining
   Scenario: Verify redirect chaining with schema validation
     When user sends "GET" request to "/redirect-to?url=/get"
     Then response status code should be 302

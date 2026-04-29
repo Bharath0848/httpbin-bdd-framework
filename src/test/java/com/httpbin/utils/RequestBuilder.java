@@ -11,9 +11,7 @@ public class RequestBuilder {
         RestAssured.baseURI = baseUri;
     }
 
-    public static RequestSpecification getRequest(boolean followRedirects) {
-    	 String token = ConfigReader.get("bearer_token");
-    	 
+    public static RequestSpecification getRequest(boolean followRedirects) {  	 
         request = RestAssured
                 .given()
                 .relaxedHTTPSValidation()
