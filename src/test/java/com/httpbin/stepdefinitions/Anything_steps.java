@@ -2,18 +2,18 @@ package com.httpbin.stepdefinitions;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.*;
-import io.restassured.RestAssured;
+
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import static io.restassured.RestAssured.*;
 
+import com.httpbin.endpoints.Routes;
 import com.httpbin.pojo.Anything_Pojo;
 import com.httpbin.utils.ExcelUtility;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-
 
 import org.testng.Assert;
 import org.testng.asserts.SoftAssert;
@@ -29,7 +29,7 @@ public class Anything_steps {
 
     @Given("I have the API base URL {string}")
     public void setBaseUri(String uri) {
-        RestAssured.baseURI = uri;
+//        RestAssured.baseURI = uri;
         request = given().header("Content-Type", "application/json");
     }
 
@@ -62,7 +62,7 @@ public class Anything_steps {
                     .header("Content-Type", "application/json")
                     .body(body)
                 .when()
-                    .post("/anything");
+                    .post(Routes.ANYTHING);
 
                 
                 softAssert.assertEquals(loopRes.getStatusCode(), 200, "Failure for record: " + name);
@@ -78,7 +78,7 @@ public class Anything_steps {
 
     @When("I submit a request to create a record")
     public void submitCreateRequest() {
-        response = request.post("/anything");
+        response = request.post(Routes.ANYTHING);
     }
 
     @Then("I save the unique ID from the response for future use")

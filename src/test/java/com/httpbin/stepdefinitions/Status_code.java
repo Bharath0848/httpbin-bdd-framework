@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.testng.Assert;
+
+import com.httpbin.endpoints.Routes;
 import com.httpbin.utils.ConfigReader;
 import com.httpbin.utils.ExcelUtility;
 
@@ -32,8 +35,27 @@ public class Status_code {
     @Given("the base url of httpbin")
     public void set_base_url() {
         ConfigReader.loadConfig();
-        baseURI = ConfigReader.get("base_url") + "/status";
+        baseURI = ConfigReader.get("base_url") + Routes.STATUS;
     }
+    
+    @When("I send Basic Auth request with valid credentials -statuscode")
+    public void sendBasicAuthRequestStatusCode() {
+        com.httpbin.utils.ConfigReader.loadConfig();
+        String user = com.httpbin.utils.ConfigReader.get("username");
+        String pass = com.httpbin.utils.ConfigReader.get("password");
+       
+        response = given()
+                    .auth().basic(user, pass)
+                   .when()
+                    .get("https://httpbin.org/basic-auth/" + user + "/" + pass);
+    }
+
+    @Then("the auth response status should be {int}") 
+    public void verifyAuthStatusCode(int expectedCode) {
+        Assert.assertEquals(response.getStatusCode(), expectedCode, "Basic Auth Failed!");
+    }
+
+    
 
     @When("the post request is sent with status code {int}")
     public void sent_post_request(int code) {
@@ -117,4 +139,5 @@ public class Status_code {
     public void validate_response_time(int time) {
         response.then().time(lessThan((long) time));
     }
+   
 }

@@ -19,14 +19,14 @@ import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInC
 
 
 public class DynamicDelayStep {
-    private String baseurl;
+   
     private Response response;
     private long responseTime;
 
     @Given("base URL is set")
     public void setBaseUrl() {
-        baseurl=ConfigReader.get("base_url");
-        RestAssured.baseURI = baseurl;
+//        baseurl=ConfigReader.get("base_url");
+//        RestAssured.baseURI = baseurl;
     }
     
    @When("I send Digest Auth request with valid username and password")
@@ -41,7 +41,7 @@ public void sendDigestAuthRequest() {
             .digest(username, password)
             .log().all()
             .when()
-            .get(baseurl + "/digest-auth/auth/" + username + "/" + password);
+            .get("/digest-auth/auth/" + username + "/" + password);
 
     System.out.println("Actual Status Code: " + response.getStatusCode());
 }

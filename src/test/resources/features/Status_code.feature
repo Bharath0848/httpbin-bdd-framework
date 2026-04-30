@@ -3,6 +3,11 @@ Feature: to perform CRUD operations on HttpBin StatusCode module
 
 Background:
   Given the base url of httpbin
+  
+   Scenario: Validate Basic Authentication behavior
+    When I send Basic Auth request with valid credentials -statuscode
+    Then the auth response status should be 200
+
 
 Scenario: Verify POST status with valid code
   When the post request is sent with status code 404

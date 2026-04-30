@@ -3,6 +3,10 @@ Feature: Validate HTTP methods behavior using httpbin
 Background:
   Given HTTPBin base URL is already set 
 
+   Scenario: Validate Digest Authentication behavior
+    When I send Digest Auth request with credentials -HttpMethod
+    Then the http method auth response status should be 200
+
 
 Scenario Outline: Validate GET request with different inputs
   When user sends GET request to "/get?name=<name>&role=<role>"

@@ -3,7 +3,10 @@ package com.httpbin.stepdefinitions;
 import io.cucumber.java.en.*;
 
 import io.cucumber.datatable.DataTable;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
+
+
 import com.httpbin.utils.ConfigReader;
 import com.httpbin.utils.ExcelUtility;
 import java.io.IOException;
@@ -30,15 +33,38 @@ public class Step_Def_HttpMethods {
 
     @Given("HTTPBin base URL is already set")
     public void setBaseUrl() {
-        baseUrl = ConfigReader.get("base_url");
+    	// Base url set via Hooks
+//        baseUrl = ConfigReader.get("base_url");
     }
+    
+    @When("I send Digest Auth request with credentials -HttpMethod")
+    public void sendDigestAuthRequestHttp() {
+
+        String username = ConfigReader.get("username");
+        String password = ConfigReader.get("password");
+
+        response = RestAssured
+                .given()
+                .auth()
+                .digest(username, password)
+                .log().all()
+                .when()
+                .get("/digest-auth/auth/" + username + "/" + password);
+
+        System.out.println("Actual Status Code: " + response.getStatusCode());
+    }
+    @Then("the http method auth response status should be {int}") 
+    public void verifyAuthHttpCode(int expectedCode) {
+        assertEquals(response.getStatusCode(), expectedCode, "Basic Auth Failed!");
+    }
+
 
     @When("user sends GET request to {string}")
     public void sendGetRequest(String endpoint) {
         response = given()
                 .auth().basic(username, password)
                 .when()
-                .get(baseUrl + endpoint);
+                .get(endpoint);
     }
 
     @Then("response args will have name {string} and role {string}")
@@ -57,7 +83,7 @@ public class Step_Def_HttpMethods {
                 .header("Content-Type", "application/json")
                 .body(body)
                 .when()
-                .post(baseUrl + "/post");
+                .post("/post");
 
         name = response.jsonPath().getString("json.name");
         role = response.jsonPath().getString("json.role");
@@ -84,7 +110,7 @@ public class Step_Def_HttpMethods {
                 .header("Content-Type", "application/json")
                 .body(body)
                 .when()
-                .put(baseUrl + endpoint);
+                .put(endpoint);
     }
 
     @Then("response json will reflect role {string}")
@@ -100,7 +126,7 @@ public class Step_Def_HttpMethods {
                 .header("Content-Type", "application/json")
                 .body("{ invalid json }")
                 .when()
-                .patch(baseUrl + endpoint);
+                .patch(endpoint);
     }
 
     @Then("response will handle invalid input")
@@ -122,7 +148,7 @@ public class Step_Def_HttpMethods {
                 .queryParam("name", name)
                 .queryParam("role", role)
                 .when()
-                .delete(baseUrl + "/delete");
+                .delete("/delete");
     }
 
     @Then("response args will match name and role from Excel data")
@@ -135,4 +161,7 @@ public class Step_Def_HttpMethods {
     public void validateResponseTime(int time) {
         assertTrue(response.getTime()< time);
     }
+    
+
+
 }

@@ -29,7 +29,8 @@ public class RedirectSteps {
 
     @Given("base URL is set to {string}")
     public void setBaseUrl(String baseUrl) {
-        RequestBuilder.setBaseUri(baseUrl);
+    	// RequestBuilder.setBaseUri(baseUrl);
+    	// Base url is configured by BaseTest Class
     }
 
     @Given("auto redirect is disabled")
@@ -144,19 +145,7 @@ public class RedirectSteps {
                     throw new IllegalArgumentException("Invalid method: " + method);
             }
 
-            logResponse(method, finalEndpoint);
-
-//            Assert.assertEquals(response.getStatusCode(), 302);
-//
-//            String location = response.getHeader("Location");
-//          
-//
-//            Assert.assertNotNull(location);
-//
-//            Assert.assertTrue(
-//                    location.startsWith(url.split("\\?")[0])
-//            );
-            
+            logResponse(method, finalEndpoint);            
             softAssert.assertEquals(response.getStatusCode(), 302,
                     "Status code failed for: " + method + " | " + url);
 
@@ -259,13 +248,6 @@ public class RedirectSteps {
         System.out.println("Response Body: " + response.getBody().asString());
         System.out.println("====================================");
     }
-    @Test
-    public void testing() {
-        RestAssured.given()
-            .formParam("url", "https://example.com")
-        .when()
-            .put("https://httpbin.org/redirect-to")
-        .then()
-            .log().all();
-    }
+    
+    
 }
